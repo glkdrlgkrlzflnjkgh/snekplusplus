@@ -32,20 +32,39 @@ impl CompileError {
         }
     }
 }
-
 fn print_error(err: &CompileError, filename: &str, src: &str) {
+    // ANSI colours
+    const RED: &str = "\x1b[31m";
+    const BOLD: &str = "\x1b[1m";
+    const RESET: &str = "\x1b[0m";
+    const DIM: &str = "\x1b[2m";
+
     let line = err.pos.line;
     let col = err.pos.column;
-    eprintln!("{filename}:{line}:{col}: error: {}", err.message);
 
+    // Header line: filename:line:col: error: message
+    eprintln!(
+        "{filename}:{line}:{col}: {RED}{BOLD}error:{RESET} {}",
+        err.message
+    );
+
+    // Extract the line of source
     if let Some(line_str) = src.lines().nth(line - 1) {
-        eprintln!("  {line} | {line_str}");
+        // Print the source line
+        eprintln!("{DIM}  {line} |{RESET} {line_str}");
+
+        // Build caret line
         let mut caret = String::new();
-        caret.push_str("    | ");
+        caret.push_str(&format!("{DIM}    |{RESET} "));
+
+        // Spaces before caret
         for _ in 1..col {
             caret.push(' ');
         }
-        caret.push('^');
+
+        // Red caret
+        caret.push_str(&format!("{RED}^{RESET}"));
+
         eprintln!("{caret}");
     }
 }
@@ -839,6 +858,8 @@ impl Parser {
         if self.pos < self.tokens.len() {
             self.pos += 1;
         }
+        self.current(); // wheeee!!!
+
     }
 
     fn parse_program(&mut self) -> Result<Program, CompileError> {
@@ -855,7 +876,13 @@ impl Parser {
 
     Ok(Program { functions })
     }
-
+    fn check_type(&mut self, expected: &TokenKind) -> bool {
+        if let Some(k) = self.peek_kind() {
+            k == expected
+        } else {
+            false
+        }
+    }
     fn parse_function(&mut self) -> Result<FunctionDecl, CompileError> {
         let visibility = self.parse_visibility()?;
         self.expect_kind(TokenKind::Funct)?;
