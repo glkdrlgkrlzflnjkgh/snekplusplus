@@ -63,7 +63,7 @@ fn print_error(err: &CompileError, filename: &str, src: &str) {
         }
 
         // Red caret
-        caret.push_str(&format!("{RED}^{RESET}"));
+        caret.push_str(&format!("{RED}↑{RESET}"));
 
         eprintln!("{caret}");
     }
