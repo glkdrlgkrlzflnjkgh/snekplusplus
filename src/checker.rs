@@ -36,7 +36,10 @@ fn check_function(func: &FunctionDecl, funcs: &HashMap<String, &FunctionDecl>) -
     }
 
     check_stmts(&func.body, func.return_type, funcs, &mut env)?;
-
+    println!("=== CHECKING FUNCTION {} ===", func.name);
+    println!("return type: {:?}", func.return_type);
+    println!("body: {:#?}", func.body);
+    println!("guaranteed_return: {}", body_guaranteed_return(&func.body));
     if func.return_type != TypeName::Void && !body_guaranteed_return(&func.body) {
         return Err(SemanticError::new(ErrorCode::NonVoidMustReturn, "non-void function must return a value on all paths"));
     }
@@ -49,9 +52,6 @@ fn body_guaranteed_return(stmts: &[Stmt]) -> bool {
         if stmt_guaranteed_return(stmt) {
             return true;
         }
-        if !matches!(stmt, Stmt::If { .. } | Stmt::Switch { .. }) {
-            continue;
-        }
     }
     false
 }
@@ -59,12 +59,33 @@ fn body_guaranteed_return(stmts: &[Stmt]) -> bool {
 fn stmt_guaranteed_return(stmt: &Stmt) -> bool {
     match stmt {
         Stmt::Return(_) => true,
+
         Stmt::If { then_body, else_body, .. } => {
-            !then_body.is_empty() && !else_body.is_empty() && body_guaranteed_return(then_body) && body_guaranteed_return(else_body)
+            // both branches must guarantee return
+            !then_body.is_empty()
+                && !else_body.is_empty()
+                && body_guaranteed_return(then_body)
+                && body_guaranteed_return(else_body)
         }
+
         Stmt::Switch { cases, .. } => {
-            !cases.is_empty() && cases.iter().all(|(_, case_body)| body_guaranteed_return(case_body)) && cases.iter().any(|(case_expr, _)| case_expr.is_none())
+            let mut has_default = false;
+            for (expr, body) in cases {
+                if expr.is_none() {
+                    has_default = true;
+                }
+                if !body_guaranteed_return(body) {
+                    return false;
+                }
+            }
+            has_default
         }
+
+        // Loops do NOT guarantee return unless you add infinite-loop detection
+        Stmt::While { .. } => false,
+        Stmt::DoWhile { .. } => false,
+        Stmt::For { .. } => false,
+
         _ => false,
     }
 }
@@ -183,6 +204,9 @@ fn check_stmt(stmt: &Stmt, ret_ty: TypeName, funcs: &HashMap<String, &FunctionDe
             }
         }
         Stmt::Break | Stmt::Continue => {}
+        Stmt::Empty => {
+            // Do absolutely nothing.
+        }
     }
     Ok(())
 }

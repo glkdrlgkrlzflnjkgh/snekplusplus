@@ -62,6 +62,6 @@ pub fn load_snekpp_with_imports(
             out.push('\n');
         }
     }
-
+    println!("=== CONCATENATED SOURCE ===\n{}\n===========================", out);
     Ok(out)
 }

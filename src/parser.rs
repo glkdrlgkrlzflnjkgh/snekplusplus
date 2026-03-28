@@ -98,8 +98,17 @@ impl Parser {
 
         let mut body = Vec::new();
         while !self.check_kind(&TokenKind::RBrace) {
-            body.push(self.parse_stmt()?);
-        }
+            let before = self.current().clone();
+            let stmt = self.parse_stmt()?;
+
+            if self.current().kind == before.kind {
+                panic!("compiler BUG! parse_stmt() did not consume any tokens!!!"); // this should NEVER. HAPPEN. PERIOD. If it does? REPORT. A. BUG.
+            }
+
+            if !stmt.is_empty() {
+                body.push(stmt);
+            }
+    }
 
         self.expect_kind(TokenKind::RBrace)?;
 
@@ -197,9 +206,13 @@ impl Parser {
                 }
             }
             _ => {
-                let expr = self.parse_expr()?;
-                self.expect_kind(TokenKind::Semicolon)?;
-                Ok(Stmt::ExprStmt(expr))
+                let t = self.current();
+                return Err(CompileError::new(
+                    &format!("unexpected token '{:?}' in statement", t.kind),
+                    t.line,
+                    t.column,
+    ));
+
             }
         }
     }

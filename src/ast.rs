@@ -69,6 +69,13 @@ pub enum Stmt {
     },
     Break,
     Continue,
+    Empty
+}
+
+impl Stmt {
+    pub fn is_empty(&self) -> bool {
+        matches!(self, Stmt::Empty)
+    }
 }
 
 #[derive(Debug, Clone)]

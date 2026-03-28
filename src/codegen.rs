@@ -246,6 +246,9 @@ fn emit_stmt(out: &mut String, stmt: &Stmt, level: usize) -> std::fmt::Result {
             indent(out, level)?;
             writeln!(out, "continue;")?;
         }
+        Stmt::Empty => { 
+            // i refuse to do anything.
+        }
     }
     Ok(())
 }
