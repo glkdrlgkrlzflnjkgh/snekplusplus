@@ -1,1 +1,3 @@
-The snek++ programming language compiler suite.
+This is snek++
+A programming language I am working on.
+Feel free to contribute!
