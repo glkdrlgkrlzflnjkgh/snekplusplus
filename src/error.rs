@@ -1,3 +1,4 @@
+use crate::color::apply_colors;
 #[derive(Debug)]
 pub struct SourcePos {
     pub line: usize,
@@ -85,7 +86,7 @@ impl ErrorCode {
             ErrorCode::TernaryTypeMismatch => "Ternary branches must evaluate to the same type.",
             ErrorCode::InvalidBinaryOperation => "Invalid operand types for binary operation.",
             ErrorCode::InvalidUnaryOperation => "Invalid operand type for unary operation.",
-            ErrorCode::UnsafeNotAllowed => "---IMPORTANT: this error is NOT emitted by the compiler yet as cpp blocks aren't implemented yet!---\n\n\n Cpp blocks are not allowed without passing --unsafe."
+            ErrorCode::UnsafeNotAllowed => "---IMPORTANT---\n\nthis error is {MAGENTA}{UNDERLINE}NOT{RESET} emitted by the compiler yet as cpp blocks aren't implemented yet!\n\n---END IMPORTANT--- \n\nCpp blocks are not allowed without passing --unsafe."
         }
     }
 
@@ -172,12 +173,8 @@ impl CompileError {
     }
 }
 
-pub fn print_error(err: &CompileError, filename: &str, src: &str) {
-    const RED: &str = "\x1b[31m";
-    const BOLD: &str = "\x1b[1m";
-    const RESET: &str = "\x1b[0m";
-    const DIM: &str = "\x1b[2m";
 
+pub fn print_error(err: &CompileError, filename: &str, src: &str) {
     let line = err.pos.line;
     let col = err.pos.column;
 
@@ -187,28 +184,31 @@ pub fn print_error(err: &CompileError, filename: &str, src: &str) {
         String::new()
     };
 
-    eprintln!(
-        "{filename}:{line}:{col}: {RED}{BOLD}error:{RESET} {code_label}{}",
+    // Escape braces so format! doesn't treat them as placeholders
+    let header = format!(
+        "{filename}:{line}:{col}: {{RED}}{{BOLD}}error:{{RESET}} {code_label}{}",
         err.message
     );
+    eprintln!("{}", apply_colors(&header));
 
     if let Some(line_str) = src.lines().nth(line - 1) {
-        eprintln!("{DIM}  {line} |{RESET} {line_str}");
+        let line_display = format!("{{DIM}}  {line} |{{RESET}} {line_str}");
+        eprintln!("{}", apply_colors(&line_display));
 
         let mut caret = String::new();
-        caret.push_str(&format!("{DIM}    |{RESET} "));
+        caret.push_str(&format!("{{DIM}}    |{{RESET}} "));
         for _ in 1..col {
             caret.push(' ');
         }
-        caret.push_str(&format!("{RED}↑{RESET}"));
+        caret.push_str("{{RED}}↑{{RESET}}");
 
-        eprintln!("{caret}");
+        eprintln!("{}", apply_colors(&caret));
     }
 }
 
 pub fn explain_error(code: ErrorCode) {
     println!("error code: {}", code.as_str());
-    println!("description:\n {}", code.description());
+    println!("description:\n {}", apply_colors(code.description()));
     println!("help: {}", code.help());
     println!("example:\n{}", code.example());
 }

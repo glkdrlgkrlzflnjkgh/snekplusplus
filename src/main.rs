@@ -5,6 +5,7 @@ mod lexer;
 mod parser;
 mod checker;
 mod codegen;
+mod color;
 
 use crate::ast::format_type;
 use crate::checker::check_program;
