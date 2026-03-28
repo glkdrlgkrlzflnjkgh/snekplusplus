@@ -60,9 +60,10 @@ fn main() {
             }
             "-optno" => opt_level = OptLevel::None,
             "-optyes" => opt_level = OptLevel::O2,
+            "-optvyes" => opt_level = OptLevel::O3,
             "--keep-intermediate" => keep_intermediate = true,
             "--help" | "-h" => {
-                println!("usage: snekplusplus <entry.spp> -o <output.exe> [-importdir DIR] [-optno|-optyes] [--keep-intermediate]");
+                println!("usage: snekplusplus <entry.spp> -o <output.exe> [-importdir DIR] [-optno|-optyes|-optvyes] [--keep-intermediate]");
                 println!("       snekplusplus explain <entry.spp> [function]");
                 println!("       snekplusplus explain --error-code <CODE>");
                 return;
@@ -80,7 +81,7 @@ fn main() {
                 } else if entry.is_none() {
                     entry = Some(arg);
                 } else {
-                    eprintln!("usage: snekplusplus <entry.spp> -o <output.exe> [-importdir DIR] [-optno|-optyes]");
+                    eprintln!("usage: snekplusplus <entry.spp> -o <output.exe> [-importdir DIR] [-optno|-optyes|-optvyes]");
                     std::process::exit(1);
                 }
             }
@@ -106,7 +107,7 @@ fn main() {
     let entry = if let Some(e) = entry {
         e
     } else {
-        eprintln!("usage: snekplusplus <entry.spp> -o <output.exe> [-importdir DIR] [-optno|-optyes]");
+        eprintln!("usage: snekplusplus <entry.spp> -o <output.exe> [-importdir DIR] [-optno|-optyes|-optvyes]");
         std::process::exit(1);
     };
 
@@ -180,6 +181,8 @@ fn main() {
     match opt_level {
         OptLevel::None => {}
         OptLevel::O2 => cmd.push_str(" -O2"),
+        OptLevel::O3 => cmd.push_str(" -O3"),
+        
     }
     cmd.push_str(" -o ");
     cmd.push_str(output.unwrap().as_str());
@@ -244,4 +247,5 @@ fn explain_program(program: &crate::ast::Program, item: Option<&str>) {
 enum OptLevel {
     None,
     O2,
+    O3
 }

@@ -36,10 +36,7 @@ fn check_function(func: &FunctionDecl, funcs: &HashMap<String, &FunctionDecl>) -
     }
 
     check_stmts(&func.body, func.return_type, funcs, &mut env)?;
-    println!("=== CHECKING FUNCTION {} ===", func.name);
-    println!("return type: {:?}", func.return_type);
-    println!("body: {:#?}", func.body);
-    println!("guaranteed_return: {}", body_guaranteed_return(&func.body));
+
     if func.return_type != TypeName::Void && !body_guaranteed_return(&func.body) {
         return Err(SemanticError::new(ErrorCode::NonVoidMustReturn, "non-void function must return a value on all paths"));
     }

@@ -21,6 +21,7 @@ pub enum ErrorCode {
     TernaryTypeMismatch,
     InvalidBinaryOperation,
     InvalidUnaryOperation,
+    UnsafeNotAllowed
 }
 
 impl ErrorCode {
@@ -41,6 +42,7 @@ impl ErrorCode {
             ErrorCode::TernaryTypeMismatch => "TERNARY_TYPE_MISMATCH",
             ErrorCode::InvalidBinaryOperation => "INVALID_BINARY_OPERATION",
             ErrorCode::InvalidUnaryOperation => "INVALID_UNARY_OPERATION",
+            ErrorCode::UnsafeNotAllowed => "UNSAFE_NOT_ALLOWED"
         }
     }
 
@@ -61,6 +63,7 @@ impl ErrorCode {
             "TERNARY_TYPE_MISMATCH" => Some(ErrorCode::TernaryTypeMismatch),
             "INVALID_BINARY_OPERATION" => Some(ErrorCode::InvalidBinaryOperation),
             "INVALID_UNARY_OPERATION" => Some(ErrorCode::InvalidUnaryOperation),
+            "UNSAFE_NOT_ALLOWED" => Some(ErrorCode::UnsafeNotAllowed),
             _ => None,
         }
     }
@@ -82,6 +85,7 @@ impl ErrorCode {
             ErrorCode::TernaryTypeMismatch => "Ternary branches must evaluate to the same type.",
             ErrorCode::InvalidBinaryOperation => "Invalid operand types for binary operation.",
             ErrorCode::InvalidUnaryOperation => "Invalid operand type for unary operation.",
+            ErrorCode::UnsafeNotAllowed => "---IMPORTANT: this error is NOT emitted by the compiler yet as cpp blocks aren't implemented yet!---\n\n\n Cpp blocks are not allowed without passing --unsafe."
         }
     }
 
@@ -102,6 +106,7 @@ impl ErrorCode {
             ErrorCode::TernaryTypeMismatch => "Make both branches produce the same type.",
             ErrorCode::InvalidBinaryOperation => "Use compatible operands for the specified binary operator.",
             ErrorCode::InvalidUnaryOperation => "Use operator with matching operand type.",
+            ErrorCode::UnsafeNotAllowed => "Pass --unsafe to the compiler on compilation."
         }
     }
 
@@ -122,6 +127,7 @@ impl ErrorCode {
             ErrorCode::TernaryTypeMismatch => "true ? 1 : 'a'",
             ErrorCode::InvalidBinaryOperation => "1 + true",
             ErrorCode::InvalidUnaryOperation => "!1",
+            ErrorCode::UnsafeNotAllowed => "cpp {std::cout << \"hello!\" << std::endl;}"
         }
     }
 }
@@ -202,7 +208,7 @@ pub fn print_error(err: &CompileError, filename: &str, src: &str) {
 
 pub fn explain_error(code: ErrorCode) {
     println!("error code: {}", code.as_str());
-    println!("description: {}", code.description());
+    println!("description:\n {}", code.description());
     println!("help: {}", code.help());
     println!("example:\n{}", code.example());
 }
@@ -226,6 +232,7 @@ pub fn explain_error_help() {
         ErrorCode::TernaryTypeMismatch,
         ErrorCode::InvalidBinaryOperation,
         ErrorCode::InvalidUnaryOperation,
+        ErrorCode::UnsafeNotAllowed
     ] {
         println!("- {}: {}", code.as_str(), code.description());
     }

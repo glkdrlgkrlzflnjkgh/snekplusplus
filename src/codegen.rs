@@ -18,7 +18,8 @@ fn cpp_type(ty: TypeName) -> &'static str {
 
 pub fn generate_cpp(program: &Program) -> String {
     let mut out = String::new();
-    writeln!(&mut out, "// Snek++ → C++").unwrap();
+    writeln!(&mut out, "// Snek++ generated C++").unwrap();
+    writeln!(&mut out, "// DO NOT EDIT!!!").unwrap();
     writeln!(&mut out, "#include <iostream>").unwrap();
     writeln!(&mut out, "#include <string>").unwrap();
     writeln!(&mut out, "").unwrap();
