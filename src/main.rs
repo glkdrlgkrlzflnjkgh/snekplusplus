@@ -176,7 +176,7 @@ fn main() {
     }
 
     let cpp = generate_cpp(&program);
-    fs::write("out.cpp", &cpp).expect("failed to write out.cpp");
+    fs::write("out.cpp", &cpp).expect("failed to write out.cpp!");
 
     let mut cmd = String::from("clang++ out.cpp -std=c++20");
     match opt_level {

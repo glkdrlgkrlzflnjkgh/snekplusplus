@@ -21,9 +21,10 @@ pub fn check_program(program: &Program) -> Result<(), SemanticError> {
 }
 
 fn check_function(func: &FunctionDecl, funcs: &HashMap<String, &FunctionDecl>) -> Result<(), SemanticError> {
-    if func.name == "Main" && func.return_type != TypeName::Int {
-        return Err(SemanticError::new(ErrorCode::MainMustReturnInt, "Main must return int"));
+    if func.name == "main" && func.return_type != TypeName::Int {
+        return Err(SemanticError::new(ErrorCode::MainMustReturnInt, "main must return int"));
     }
+
 
     let mut env: HashMap<String, TypeName> = HashMap::new();
     for param in &func.params {
