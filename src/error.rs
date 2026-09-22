@@ -86,7 +86,7 @@ impl ErrorCode {
             ErrorCode::TernaryTypeMismatch => "Ternary branches must evaluate to the same type.",
             ErrorCode::InvalidBinaryOperation => "Invalid operand types for binary operation.",
             ErrorCode::InvalidUnaryOperation => "Invalid operand type for unary operation.",
-            ErrorCode::UnsafeNotAllowed => "---IMPORTANT---\n\nthis error is {MAGENTA}{UNDERLINE}NOT{RESET} emitted by the compiler yet as cpp blocks aren't implemented yet!\n\n---END IMPORTANT--- \n\nCpp blocks are not allowed without passing --unsafe."
+            ErrorCode::UnsafeNotAllowed => "-NOT EMITTED CURRENTLY- The cpp block may only be used when --unsafe is passed!"
         }
     }
 
