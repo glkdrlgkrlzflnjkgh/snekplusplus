@@ -13,20 +13,46 @@ pub fn check_program(program: &Program) -> Result<(), SemanticError> {
         }
     }
 
+    // ⭐ NEW: Build global variable environment
+    let mut globals: HashMap<String, TypeName> = HashMap::new();
+    for g in &program.globals {
+        if let Stmt::VarDecl { explicit_type, name, init } = g {
+            let ty = explicit_type.unwrap_or_else(|| {
+                // infer type from initializer
+                match init {
+                    Expr::Number(_) => TypeName::Int,
+                    Expr::Float(_) => TypeName::Float,
+                    Expr::BoolLiteral(_) => TypeName::Bool,
+                    Expr::StringLiteral(_) => TypeName::String,
+                    Expr::CharLiteral(_) => TypeName::Char,
+                    _ => panic!("unsupported global initializer"),
+                }
+            });
+
+            globals.insert(name.clone(), ty);
+        }
+    }
+
+    // ⭐ Pass globals into each function
     for func in &program.functions {
-        check_function(func, &funcs)?;
+        check_function(func, &funcs, &globals)?;
     }
 
     Ok(())
 }
 
-fn check_function(func: &FunctionDecl, funcs: &HashMap<String, &FunctionDecl>) -> Result<(), SemanticError> {
+
+fn check_function(
+    func: &FunctionDecl,
+    funcs: &HashMap<String, &FunctionDecl>,
+    globals: &HashMap<String, TypeName>
+) -> Result<(), SemanticError> {
     if func.name == "main" && func.return_type != TypeName::Int {
         return Err(SemanticError::new(ErrorCode::MainMustReturnInt, "main must return int"));
     }
 
 
-    let mut env: HashMap<String, TypeName> = HashMap::new();
+    let mut env: HashMap<String, TypeName> = globals.clone();
     for param in &func.params {
         if env.insert(param.name.clone(), param.ty).is_some() {
             return Err(SemanticError::new(

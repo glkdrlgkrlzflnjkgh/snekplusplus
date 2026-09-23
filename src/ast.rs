@@ -1,9 +1,3 @@
-#[derive(Debug, Clone, Copy)]
-pub struct Span {
-    pub line: usize,
-    pub column: usize,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TypeName {
     Int,
@@ -14,8 +8,6 @@ pub enum TypeName {
     Double,
     Char,
 }
-
-
 
 #[derive(Debug, Clone, Copy)]
 pub enum Visibility {
@@ -214,6 +206,7 @@ pub struct Token {
 
 #[derive(Debug)]
 pub struct Program {
+    pub globals: Vec<Stmt>,        // VarDecl only
     pub functions: Vec<FunctionDecl>,
 }
 
@@ -228,4 +221,3 @@ pub fn format_type(ty: TypeName) -> &'static str {
         TypeName::Char => "char",
     }
 }
-

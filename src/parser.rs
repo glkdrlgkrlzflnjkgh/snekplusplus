@@ -38,6 +38,7 @@ impl Parser {
     }
 
     pub fn parse_program(&mut self) -> Result<Program, CompileError> {
+        let mut globals = Vec::new();
         let mut functions = Vec::new();
 
         loop {
@@ -45,11 +46,48 @@ impl Parser {
                 break;
             }
 
-            functions.push(self.parse_function()?);
+            match self.peek_kind() {
+                // Global variable declarations
+                Some(TokenKind::Int)
+                | Some(TokenKind::Bool)
+                | Some(TokenKind::StringType)
+                | Some(TokenKind::Float)
+                | Some(TokenKind::Double)
+                | Some(TokenKind::CharType)
+                | Some(TokenKind::Var) => {
+                    let decl = self.parse_var_decl()?;
+                    globals.push(decl);
+                }
+
+                // Function declarations
+                Some(TokenKind::Public)
+                | Some(TokenKind::Private)
+                | Some(TokenKind::Protected) => {
+                    let func = self.parse_function()?;
+                    functions.push(func);
+                }
+
+                // If someone writes a function without visibility
+                Some(TokenKind::Funct) => {
+                    let func = self.parse_function()?;
+                    functions.push(func);
+                }
+
+                // Anything else is invalid
+                _ => {
+                    let t = self.current();
+                    return Err(CompileError::new(
+                        "expected global variable or function",
+                        t.line,
+                        t.column,
+                    ));
+                }
+            }
         }
 
-        Ok(Program { functions })
+        Ok(Program { globals, functions })
     }
+
 
     fn parse_function(&mut self) -> Result<FunctionDecl, CompileError> {
         let visibility = self.parse_visibility()?;
@@ -98,12 +136,9 @@ impl Parser {
 
         let mut body = Vec::new();
         while !self.check_kind(&TokenKind::RBrace) {
-            let before = self.current().clone();
             let stmt = self.parse_stmt()?;
 
-            if self.current().kind == before.kind {
-                panic!("compiler BUG! parse_stmt() did not consume any tokens!!!"); // this should NEVER. HAPPEN. PERIOD. If it does? REPORT. A. BUG.
-            }
+
 
             if !stmt.is_empty() {
                 body.push(stmt);
@@ -131,13 +166,7 @@ impl Parser {
             TokenKind::Public => Visibility::Public,
             TokenKind::Private => Visibility::Private,
             TokenKind::Protected => Visibility::Protected,
-            _ => {
-                return Err(CompileError::new(
-                    "expected visibility (public/private/protected)",
-                    t.line,
-                    t.column,
-                ))
-            }
+            _ => Visibility::Private // Default to private
         };
         self.advance();
         Ok(vis)

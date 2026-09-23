@@ -4,6 +4,18 @@ use std::fmt::Write as _;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
+fn infer_type_from_expr(expr: &Expr) -> &'static str {
+    match expr {
+        Expr::Number(_) => "int",
+        Expr::Float(_) => "float",
+        Expr::BoolLiteral(_) => "bool",
+        Expr::StringLiteral(_) => "std::string",
+        Expr::CharLiteral(_) => "char",
+        _ => "auto", // fallback
+    }
+}
+
+
 fn cpp_type(ty: TypeName) -> &'static str {
     match ty {
         TypeName::Int => "int",
@@ -30,7 +42,21 @@ pub fn generate_cpp(program: &Program) -> String {
     if total > 0 {
         println!("Generating C++ code for {} functions...", total);
     }
+    for g in &program.globals {
+        if let Stmt::VarDecl { explicit_type, name, init } = g {
+            let ty = match explicit_type {
+                Some(t) => cpp_type(*t),
+                None => infer_type_from_expr(init),
+            };
 
+            let mut init_code = String::new();
+            emit_expr(&mut init_code, init).unwrap();
+            let comment = "//-- IMPORTED GLOBAL --";
+            writeln!(&mut out, "{ty} {name} = {init_code}; {comment}").unwrap();
+        }
+    }
+
+    writeln!(&mut out, "").unwrap();
     let funcs_cpp: Vec<String> = program
         .functions
         .par_iter()
