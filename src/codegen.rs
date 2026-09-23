@@ -99,7 +99,7 @@ fn emit_function(out: &mut String, func: &FunctionDecl) -> std::fmt::Result {
 
 fn indent(out: &mut String, level: usize) -> std::fmt::Result {
     for _ in 0..level {
-        write!(out, "    ")?;
+        write!(out, "   ")?;
     }
     Ok(())
 }
@@ -269,7 +269,7 @@ fn emit_stmt(out: &mut String, stmt: &Stmt, level: usize) -> std::fmt::Result {
             writeln!(out, "continue;")?;
         }
         Stmt::Empty => { 
-            // i refuse to do anything.
+            writeln!(out, "// Empty statement.")?;
         }
     }
     Ok(())
