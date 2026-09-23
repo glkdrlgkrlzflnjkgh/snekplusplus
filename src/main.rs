@@ -193,8 +193,6 @@ fn main() {
         .status()
         .expect("failed to invoke clang++ via cmd.exe");
 
-    eprintln!("clang++ exit status: {status}");
-
     if !keep_intermediate {
         if let Err(e) = fs::remove_file("out.cpp") {
             eprintln!("warning: failed to remove out.cpp: {e}");
