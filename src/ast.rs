@@ -69,7 +69,7 @@ pub enum Stmt {
     },
     Break,
     Continue,
-    Empty
+    Empty // Rust, shut up, this will be used in future.
 }
 
 impl Stmt {
