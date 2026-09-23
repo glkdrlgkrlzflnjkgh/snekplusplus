@@ -36,12 +36,10 @@ pub fn generate_cpp(program: &Program) -> String {
     writeln!(&mut out, "#include <string>").unwrap();
     writeln!(&mut out, "").unwrap();
 
-    let total = program.functions.len();
+
     let counter = Arc::new(AtomicUsize::new(0));
 
-    if total > 0 {
-        println!("Generating C++ code for {} functions...", total);
-    }
+
     for g in &program.globals {
         if let Stmt::VarDecl { explicit_type, name, init } = g {
             let ty = match explicit_type {
@@ -68,10 +66,7 @@ pub fn generate_cpp(program: &Program) -> String {
         })
         .collect();
 
-    if total > 0 {
-        println!("Finished generating C++ code for {} functions.", total);
-        println!("Invoking clang++ to compile the generated code...");
-    }
+
 
     for f in funcs_cpp {
         writeln!(&mut out, "{f}").unwrap();
