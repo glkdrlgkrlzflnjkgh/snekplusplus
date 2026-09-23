@@ -124,11 +124,6 @@ impl<'a> Lexer<'a> {
                         tokens.push(Token { kind: TokenKind::Slash, line, column });
                     }
                 }
-                '#' => {
-                    while self.peek() != Some('\n') && self.peek().is_some() {
-                        self.bump();
-                    }
-                }
                 '%' => {
                     let (line, column) = (self.line, self.column);
                     self.bump();
